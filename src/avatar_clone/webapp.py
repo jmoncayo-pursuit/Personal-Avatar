@@ -338,7 +338,7 @@ INDEX_HTML = """<!doctype html>
       <h2>3. Speech Text</h2>
       <p class="desc">What should your avatar say?</p>
       
-      <textarea id="render-text" placeholder="Hello, I am a digital avatar. Nice to meet you!">Hi, this is Jean speaking. I care a lot about building tools that are useful, clear, and grounded in real-life applications. I am excited to demonstrate my new high-definition digital avatar clone, featuring custom voice cloning and precise, crystal-clear lip synchronization. I look forward to sharing practical ideas, explaining technical concepts simply, and making steady, conversational progress.</textarea>
+      <textarea id="render-text" placeholder="Hello, I am a digital avatar. Nice to meet you!">Hi, this is a demonstration of my new high-definition digital avatar clone. I care a lot about building tools that are useful, clear, and grounded in real-life applications. I look forward to sharing practical ideas, explaining technical concepts simply, and making steady, conversational progress.</textarea>
       <input type="hidden" id="voice-speed" value="0.88">
     </div>
 
@@ -997,10 +997,11 @@ def create_app(config: AppConfig) -> Flask:
     jobs_lock = threading.Lock()
 
     default_portrait_candidates = [
-        project_root / "data/portraits/jean_headshot_1024.png",
+        project_root / "data/portraits/portrait.png",
+        project_root / "data/portraits/default.png",
     ]
     default_portrait = next((path for path in default_portrait_candidates if path.exists()), None)
-    reference_script_path = project_root / "data/voice_refs/jean_reference_script.txt"
+    reference_script_path = project_root / "data/voice_refs/reference_script.txt"
     reference_script = reference_script_path.read_text(encoding="utf-8").strip() if reference_script_path.exists() else ""
 
     uploads_audio_dir = ensure_dir(project_root / "data/voice_refs/uploads")

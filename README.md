@@ -101,9 +101,9 @@ Generate cloned speech from target text:
 
 ```bash
 avatar-clone render-voice \
-  --text "Hi, this is Jean. I am excited to demonstrate my new digital avatar clone." \
+  --text "Hi, this is a demonstration of my new digital avatar clone." \
   --ref-audio data/voice_refs/prepared/voice.wav \
-  --ref-text "Hey there! My name is Jean." \
+  --ref-text "Hey there! I am recording my voice." \
   --output data/outputs/cloned_speech.wav
 ```
 
@@ -112,9 +112,9 @@ Go from text directly to high-definition voice and lip-synced talking-head video
 
 ```bash
 avatar-clone pipeline \
-  --text "Hi, this is Jean. I am excited to demonstrate my new digital avatar clone." \
+  --text "Hi, this is a demonstration of my new digital avatar clone." \
   --ref-audio data/voice_refs/prepared/voice.wav \
-  --ref-text "Hey there! My name is Jean." \
+  --ref-text "Hey there! I am recording my voice." \
   --source-image data/portraits/uploads/portrait.png \
   --output-dir data/outputs/runs/my_avatar
 ```
@@ -124,6 +124,6 @@ avatar-clone pipeline \
 ## Timbre & Style Cloning Protocols (Crucial for F5-TTS)
 
 To avoid hallucinations, repeating phrases, or context matrix collapse:
-1. **Pristine Reference Context**: Use a reference audio file between **3 and 5 seconds** long (ideal: *"Hey there! My name is Jean."*).
+1. **Pristine Reference Context**: Use a reference audio file between **3 and 5 seconds** long (ideal: *"Hey there! I am recording my voice."*).
 2. **Matching Transcript**: Ensure the reference transcript perfectly matches the exact words spoken in the reference recording.
 3. **No Background Noise**: Perform recordings in a silent room. Flow-matching transformers will replicate any background hiss, click, or room reverb across the entire synthesized speech timeline.

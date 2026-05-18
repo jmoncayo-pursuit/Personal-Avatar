@@ -1,71 +1,57 @@
-# First Recording
+# First Recording Guide
 
-This is the fastest path to a first clone that still sounds like you.
+This guide describes the fastest, most reliable path to capture and prepare a high-fidelity reference audio recording for zero-shot voice cloning.
 
-## Use this setup
+---
 
-- Record in `Voice Memos` or `QuickTime Player`
-- Use wired earbuds or your laptop mic if that is all you have
-- Pick the quietest soft-furnished room you can
-- Speak a little slower and calmer than normal conversation
+## 1. Acoustic and Recording Setup
 
-## Aim for one strong take
+* **Silent Environment**: Choose the quietest, soft-furnished room available (e.g., a room with carpets, curtains, and soft furniture to absorb sound reflection).
+* **Hardware**: Wired earbuds or a high-quality laptop microphone are fully sufficient. Avoid using bluetooth microphones due to compression artifacts.
+* **Cadence**: Speak slightly slower, calmer, and clearer than your average conversational speed.
+* **Isolation**: Ensure no background clicks, music, fan hums, or notification sounds are captured.
 
-For the first run, do this:
+---
 
-- `10` to `20` seconds
-- one take
-- natural pacing
-- no background music
-- no keyboard clicks
+## 2. Scripting Your Reference Clip
 
-## Read this, naturally
+For the best results with `F5-TTS`, aim for a clean, single-take recording of approximately **3 to 7 seconds** (containing about 8 to 15 words).
 
-Use the script in:
+### Proposed Generic Script
+> *"Hey there! I am recording my voice to build a digital clone."*
 
-- [`data/voice_refs/jean_reference_script.txt`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/data/voice_refs/jean_reference_script.txt)
+---
 
-Do not perform it like an announcer. The best reference clip sounds like your normal speaking voice on a very good day.
+## 3. Preparing the Audio for cloning
 
-## Save the raw file
+Save your raw microphone recording to a directory (e.g., `data/voice_refs/raw_take_01.m4a`). 
 
-Examples:
-
-- `data/voice_refs/jean_raw_take_01.m4a`
-- `data/voice_refs/jean_raw_take_01.wav`
-
-## Prep it for cloning
+Run the preparation pipeline to trim silences, convert to mono, and normalize loudness to standard LUFS targets:
 
 ```bash
-.venv/bin/avatar-clone prep-audio \
-  --input data/voice_refs/jean_raw_take_01.m4a \
-  --output data/voice_refs/jean_ref_take_01.wav
+avatar-clone prep-audio \
+  --input data/voice_refs/raw_take_01.m4a \
+  --output data/voice_refs/prepared/voice.wav
 ```
 
-That command:
+This utility performs:
+1. **Silence Trimming**: Deletes dead air at the beginning and end of the recording.
+2. **Mono Downmixing**: Combines stereo channels to mono.
+3. **Loudness Normalization**: Targets standard integrated LUFS for clean transformer input.
 
-- trims dead air at the start and end
-- converts to mono
-- normalizes loudness
-- writes a clean `wav`
+---
 
-## Save the transcript beside it
+## 4. Staging the Reference Transcript
 
-Create:
+Beside your prepared `voice.wav`, stage a matching text file containing the exact transcription of the spoken words:
 
-- `data/voice_refs/jean_ref_take_01.txt`
+* File: `data/voice_refs/prepared/voice.txt`
+* Content: `Hey there! I am recording my voice to build a digital clone.`
 
-And paste the exact words you actually said, including any small mistakes or restarts if they made it into the final clip.
+Ensure the text file matches your spoken pronunciation exactly.
 
-## Best first test pair
+---
 
-For your first end-to-end run, use:
+## 5. Staging Your Portrait Stills
 
-- portrait: [`data/portraits/jean_headshot_1024.png`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/data/portraits/jean_headshot_1024.png)
-- audio: `data/voice_refs/jean_ref_take_01.wav`
-
-## If the first clone sounds off
-
-- Too robotic: rerecord with warmer pacing and fewer clipped consonants
-- Too generic: use a slightly longer reference clip, around `15` to `20` seconds
-- Too breathy or noisy: move farther from walls and turn off fans
+Stage a clean, front-facing neutral portrait image (e.g., `data/portraits/portrait.png`) to serve as the visual baseline for talking-head rendering.

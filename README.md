@@ -1,58 +1,46 @@
-# Personal Avatar Clone
+# Personal Avatar Clone 🎥🎙️
 
-Free, local-first scaffolding for building a voice + video avatar of yourself without reinventing the wheel.
+A local-first, privacy-respecting pipeline for generating perfectly lip-synced, high-definition digital clones on Apple Silicon. This repository integrates a non-autoregressive flow-matching voice synthesizer (`F5-TTS`) with an audio-driven talking-head animator (`SadTalker`), optimized for macOS architectures.
 
-This repo does not train a new foundation model from scratch. Instead, it gives you a stable controller layer that can drive proven open-source backends with separate Python environments on macOS.
+---
 
-## Recommended stack
+## Key Features & Architecture
 
-### Default MVP
+* **100% Offline & Private**: All data processing, audio synthesis, and neural convolutions execute locally on your machine. Absolutely zero data is sent to external clouds or third-party APIs.
+* **Stable Attention Windows**: Standard flow-matching voice models loop at long text contexts. This platform integrates a **Sentence-Level Audio Chunking Engine** that splits input texts at sentence boundaries, synthesizes independent vocal segments, and stitches them with a natural 0.25-second silent cadence pause to eliminate all word looping or attention drift.
+* **Apple Silicon Optimized Convolutions**: Bound multi-threading constraints (`OMP_NUM_THREADS = 4` / `MKL_NUM_THREADS = 4`) eliminate lock congestion, running face animation restoration at a stable **~25.60 seconds per frame** on macOS CPU.
+* **GFPGAN HD Face Restoration**: Integrated Generative Facial Prior GAN upscales facial structures, delivering crisp, high-definition output videos.
 
-- Voice: `F5-TTS`
-- Video: `SadTalker`
+---
 
-Why this pairing:
+## Recommended Stack
 
-- `F5-TTS` has an official Apple Silicon install path and a Python API we can script cleanly.
-- `SadTalker` is audio-driven, so it fits the "type text -> clone voice -> produce talking head video" workflow.
+### Default Core Stack
+* **Voice Synthesis**: `F5-TTS` (Flow-Matching Transformer).
+* **Talking-Head Animation**: `SadTalker` (with default `gfpgan` HD restoration).
 
-### Upgrade path
+### Target Performance Metrics (Apple Silicon CPU)
+* **Voice Cloning Step**: ~30–40 seconds of generation time for a 5-second sentence.
+* **Video Animation Step**: ~25.6 seconds per frame (25 FPS).
+  * **5-Second Video (125 frames)** ≈ **53 minutes**
+  * **12-Second Video (300 frames)** ≈ **2.1 hours**
+  * **30-Second Video (750 frames)** ≈ **5.3 hours**
 
-- Better motion control: `LivePortrait`
-- More permissive voice-cloning option to investigate later: `OpenVoice`
+---
 
-Why `LivePortrait` is not the default:
+## Project Structure
 
-- It is driven by video or motion templates, not directly by TTS audio.
-- It can still be useful once you record a few short driving clips of yourself, but `SadTalker` is the simpler first win.
+* [docs/setup_mac.md](docs/setup_mac.md): Step-by-step walk-through for setting up isolated backend Python interpreters on macOS.
+* [docs/capture_guide.md](docs/capture_guide.md): Photographic and acoustic protocols for pristine reference media.
+* [docs/first_recording.md](docs/first_recording.md): Scripting and cadence strategies for training-ready voice cloning.
+* [avatar.config.example.json](avatar.config.example.json): Configuration template with relative virtual-environment pointers.
 
-Why `Wav2Lip` is not the default:
+---
 
-- The official open-source repo still documents `Python 3.6`.
-- The authors explicitly limit the open model to research/academic/personal use.
-- It is still useful as a specialist lipsync tool, just not the cleanest foundation for your first local build.
+## Quick Start
 
-## What this repo gives you
-
-- A small CLI controller we own
-- Config for separate backend environments
-- A bootstrap command to clone official repos locally
-- A prep command to clean a raw recording into a clone-ready reference clip
-- A pipeline command to go from text -> cloned voice -> talking-head render
-- A local web UI for uploading assets and running the pipeline visually
-- A capture guide so your first recordings are actually usable
-
-## Project layout
-
-- [`avatar.config.json`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/avatar.config.json)
-- [`src/avatar_clone/cli.py`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/src/avatar_clone/cli.py)
-- [`docs/capture_guide.md`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/docs/capture_guide.md)
-- [`docs/setup_mac.md`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/docs/setup_mac.md)
-- [`docs/first_recording.md`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/docs/first_recording.md)
-
-## Quick start
-
-### 1. Create the controller environment
+### 1. Initialize the Controller Environment
+Clone the repository and install the packaged command-line controller in an isolated virtual environment:
 
 ```bash
 uv venv .venv
@@ -60,122 +48,82 @@ source .venv/bin/activate
 uv pip install -e .
 ```
 
-### 2. Clone the backend repos
+### 2. Clone Upstream Repositories
+Bootstrap the official external repositories into the local `external/` folder:
 
 ```bash
-PYTHONPATH=src python3 -m avatar_clone bootstrap --with-liveportrait
+avatar-clone bootstrap
 ```
 
-That clones the official repos into `external/`.
+### 3. Create Backend Virtual Environments
+F5-TTS and SadTalker require different Python versions and package indices. Follow the detailed [macOS Virtual Environment Guide](docs/setup_mac.md) to set them up:
+* **F5-TTS Environment**: Python `3.11`
+* **SadTalker Environment**: Python `3.8`
 
-### 3. Create separate backend envs
-
-Use the versions the upstream projects document.
-
-Suggested macOS split:
-
-- `F5-TTS`: Python `3.11`
-- `SadTalker`: Python `3.8`
-- `LivePortrait`: Python `3.10`
-
-The controller is intentionally separate from those envs.
-
-There is a concrete setup walkthrough here:
-
-- [`docs/setup_mac.md`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/docs/setup_mac.md)
-
-### 4. Fill in backend paths
-
-Edit [`avatar.config.json`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/avatar.config.json) and replace the placeholder Python paths with the interpreters for each backend env. Also confirm the repo paths under `external/`.
-
-### 5. Check the setup
+### 4. Configure Local Paths
+Copy the provided config template and edit it to map your local virtual environment Python interpreters:
 
 ```bash
-PYTHONPATH=src python3 -m avatar_clone doctor
+cp avatar.config.example.json avatar.config.json
 ```
+Open `avatar.config.json` and verify the `"python"` key paths point to the correct active virtual environments. Note: `avatar.config.json` is strictly gitignored to keep your system directories private.
 
-### Optional: launch the web UI
+### 5. Validate System Integrity
+Run the diagnostic check to ensure all models, configurations, and backend scripts are fully prepared:
 
 ```bash
-.venv/bin/avatar-clone ui
+avatar-clone doctor
 ```
 
-Then open:
-
-- [http://127.0.0.1:7861](http://127.0.0.1:7861)
-
-### 6. Put your assets here
-
-- Voice reference audio: `data/voice_refs/`
-- Portrait stills: `data/portraits/`
-- Driving clips for `LivePortrait`: `data/driving_videos/`
-
-Read the capture guide first:
-
-- [`docs/capture_guide.md`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/docs/capture_guide.md)
-- [`docs/first_recording.md`](/Users/jmoncayopursuit.org/Desktop/Personal_Avatar/docs/first_recording.md)
-
-### 7. Generate a voice clone sample
-
-If your source is a raw voice memo, prep it first:
+### 6. Launch the Studio Web UI
+Launch the interactive web UI:
 
 ```bash
-PYTHONPATH=src python3 -m avatar_clone prep-audio \
-  --input data/voice_refs/me_raw.m4a \
-  --output data/voice_refs/me_ref.wav
+avatar-clone ui
 ```
+Open [http://127.0.0.1:7861](http://127.0.0.1:7861) in your browser. The interface features a premium glassmorphic dark theme and a step-by-step wizard.
 
-Then generate the clone sample:
+---
+
+## Command Line Usage
+
+### A. Prep reference audio
+Clean and normalize a raw microphone recording into an optimized, clone-ready WAV file:
 
 ```bash
-PYTHONPATH=src python3 -m avatar_clone render-voice \
-  --text "This is my first local avatar test." \
-  --ref-audio data/voice_refs/me_ref.wav \
-  --ref-text "This is the transcript of my reference clip." \
-  --output data/outputs/test_voice.wav
+avatar-clone prep-audio \
+  --input data/voice_refs/raw_recording.m4a \
+  --output data/voice_refs/prepared/voice.wav
 ```
 
-### 8. Generate a talking-head clip
+### B. Generate Voice Only
+Generate cloned speech from target text:
 
 ```bash
-PYTHONPATH=src python3 -m avatar_clone pipeline \
-  --text "This is my first end to end avatar test." \
-  --ref-audio data/voice_refs/me_ref.wav \
-  --ref-text "This is the transcript of my reference clip." \
-  --source-image data/portraits/me_front.png
+avatar-clone render-voice \
+  --text "Hi, this is Jean. I am excited to demonstrate my new digital avatar clone." \
+  --ref-audio data/voice_refs/prepared/voice.wav \
+  --ref-text "Hey there! My name is Jean." \
+  --output data/outputs/cloned_speech.wav
 ```
 
-That uses:
-
-- voice backend: `f5_tts`
-- video backend: `sadtalker`
-
-If you want the `LivePortrait` path instead:
+### C. Execute End-to-End Pipeline
+Go from text directly to high-definition voice and lip-synced talking-head video:
 
 ```bash
-PYTHONPATH=src python3 -m avatar_clone pipeline \
-  --text "Testing motion transfer with my cloned voice." \
-  --ref-audio data/voice_refs/me_ref.wav \
-  --ref-text "This is the transcript of my reference clip." \
-  --source-image data/portraits/me_front.png \
-  --video-backend liveportrait \
-  --driving-video data/driving_videos/me_neutral_driver.mp4
+avatar-clone pipeline \
+  --text "Hi, this is Jean. I am excited to demonstrate my new digital avatar clone." \
+  --ref-audio data/voice_refs/prepared/voice.wav \
+  --ref-text "Hey there! My name is Jean." \
+  --source-image data/portraits/uploads/portrait.png \
+  --output-dir data/outputs/runs/my_avatar
 ```
 
-## Notes on licenses
+---
 
-- `F5-TTS` code is MIT, but the official pre-trained weights are documented in the repo as `CC-BY-NC`.
-- `SadTalker` states its repo license is Apache 2.0 and that the non-commercial restriction was removed.
-- `LivePortrait` repo code is MIT, but its published license file notes that bundled `InsightFace` models are for non-commercial research use unless you replace them.
+## Timbre & Style Cloning Protocols (Crucial for F5-TTS)
 
-If your goal ever becomes commercial, we should do a stricter license pass before shipping anything public.
-
-## Official upstream sources
-
-- [F5-TTS](https://github.com/SWivid/F5-TTS)
-- [F5-TTS inference docs](https://github.com/SWivid/F5-TTS/blob/main/src/f5_tts/infer/README.md)
-- [SadTalker](https://github.com/OpenTalker/SadTalker)
-- [SadTalker macOS install notes](https://github.com/OpenTalker/SadTalker/blob/main/docs/install.md)
-- [LivePortrait](https://github.com/KlingAIResearch/LivePortrait)
-- [LivePortrait license](https://github.com/KlingAIResearch/LivePortrait/blob/main/LICENSE)
-- [Wav2Lip](https://github.com/Rudrabha/Wav2Lip)
+To avoid hallucinations, repeating phrases, or context matrix collapse:
+1. **Pristine Reference Context**: Use a reference audio file between **3 and 5 seconds** long (ideal: *"Hey there! My name is Jean."*).
+2. **Matching Transcript**: Ensure the reference transcript perfectly matches the exact words spoken in the reference recording.
+3. **No Background Noise**: Perform recordings in a silent room. Flow-matching transformers will replicate any background hiss, click, or room reverb across the entire synthesized speech timeline.

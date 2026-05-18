@@ -1,0 +1,8 @@
+.DS_Store
+.envs/
+.venv/
+__pycache__/
+*.pyc
+external/
+data/
+avatar.config.json

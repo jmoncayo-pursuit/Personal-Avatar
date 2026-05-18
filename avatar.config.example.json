@@ -1,0 +1,24 @@
+{
+  "defaults": {
+    "voice": "f5_tts",
+    "video": "sadtalker"
+  },
+  "backends": {
+    "f5_tts": {
+      "kind": "voice",
+      "python": ".envs/f5-tts/bin/python",
+      "cwd": null,
+      "env": {},
+      "extra_args": []
+    },
+    "sadtalker": {
+      "kind": "video",
+      "python": ".envs/sadtalker/bin/python",
+      "cwd": "external/SadTalker",
+      "env": {},
+      "extra_args": [
+        "--still"
+      ]
+    }
+  }
+}

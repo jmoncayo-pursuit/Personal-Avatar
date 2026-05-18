@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "avatar-clone"
+version = "0.1.0"
+description = "Local-first voice and talking-head avatar orchestration."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.0.0",
+]
+
+[project.scripts]
+avatar-clone = "avatar_clone.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/avatar_clone"]
